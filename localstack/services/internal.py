@@ -178,10 +178,10 @@ class PluginsResource:
 
         plugin_managers: List[PluginManager] = [
             SERVICE_PLUGINS.plugin_manager,
-            hooks.configure_localstack_container.manager,
-            hooks.prepare_host.manager,
-            hooks.on_infra_ready.manager,
-            hooks.on_infra_start.manager,
+            hooks.configure_localstack_container.retrieve_manager,
+            hooks.prepare_host.retrieve_manager,
+            hooks.on_infra_ready.retrieve_manager,
+            hooks.on_infra_start.retrieve_manager,
         ]
 
         def get_plugin_details(_manager: PluginManager, _name: str):

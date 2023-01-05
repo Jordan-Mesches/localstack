@@ -1,19 +1,24 @@
 import importlib
 import logging
+import os
 from functools import singledispatchmethod
 from typing import Any, Dict, List, Optional, Protocol, TypedDict, runtime_checkable
+from plugin import Plugin
+from localstack import config
 
 from moto.core import BackendDict
 
 from localstack.services.stores import AccountRegionBundle
+from localstack.utils.files import load_file, rm_rf, cp_r
 
 LOG = logging.getLogger(__name__)
 
 
+@runtime_checkable
 class StateVisitor(Protocol):
     def visit(self, state_container: Any):
         """
-        Visit (=do something with) a given state container. A state container can be anything that holds service state.
+        Visit a given state container. A state container can be anything that holds service state.
         An AccountRegionBundle, a moto BackendDict, or a directory containing assets.
         """
         raise NotImplementedError
@@ -23,8 +28,9 @@ class StateVisitor(Protocol):
 class StateVisitable(Protocol):
     def accept(self, visitor: StateVisitor):
         """
-        Accept a StateVisitor. The implementing method should call visit not necessarily on itself, but can also call
-        the visit method on the state container it holds. The common case is calling visit on the stores of a provider.
+        This interface accepts a StateVisitor and declares the accept operation.
+        The implementing method should call visit not necessarily on itself, but can also call the visit method on
+        the state container it holds. The common case is calling visit on the stores of a provider.
         :param visitor: the StateVisitor
         """
 
@@ -67,6 +73,73 @@ class ServiceBackendCollectorVisitor:
         return service_backend
 
 
+class ServiceAssetsLocator:
+    """
+    This class only implements the get_assets_location method that returns the path where a service stores its
+    assets. It gets used by the visitors that retrieve and inject the assets to figure out such a location, and it's
+    not designed to be used standalone. Ad-hoc service visitors can overwrite get_assets_location if needed.
+    """
+    service: str
+
+    def get_assets_location(self) -> str:
+        base_path: str = config.dirs.data
+        return os.path.join(base_path, self.service)
+
+
+class RetrieveAssetsVisitor(Plugin, ServiceAssetsLocator):
+
+    namespace = "localstack.assets.retrieve"
+    assets: dict[str, bytes]
+    service: str
+
+    def __init__(self, service: str) -> None:
+        self.assets = {}
+        self.service = service
+
+    @singledispatchmethod
+    def visit(self, state_container: Any):
+        raise NotImplementedError("%s can't visit a type %s", self.__class__.__name__, type(state_container))
+
+    @visit.register(str)
+    def _(self, state_container: str):
+        asset_location: str = state_container
+        assets: Dict[str, bytes] = {}
+        if not os.path.isdir(asset_location):
+            return assets
+        for root, dirs, files in os.walk(asset_location, topdown=True):
+            for _file in files:
+                relative_dir = os.path.relpath(root, asset_location)
+                relative_path = os.path.join(relative_dir, _file) if relative_dir != "." else _file
+                absolute_path = os.path.join(root, _file)
+                if os.path.isfile(absolute_path):
+                    asset_name: str = relative_path
+                    asset_value: Optional[bytes] = load_file(absolute_path, mode="rb")
+                    assets[asset_name] = asset_value
+        return assets
+
+
+class InjectAssetsVisitor(Plugin, ServiceAssetsLocator):
+
+    namespace = "localstack.assets.inject"
+    service: str
+
+    def __init__(self, pod_assets_directory: str, service: str) -> None:
+        self.pod_assets_directory = pod_assets_directory
+        self.service = service
+
+    @singledispatchmethod
+    def visit(self, state_container: Any):
+        raise NotImplementedError("%s can't visit a type %s", self.__class__.__name__, type(state_container))
+
+    @visit.register(str)
+    def _(self, state_container: str):
+        assets_destination = state_container
+        pod_assets = os.path.join(self.pod_assets_directory, self.service)
+        rm_rf(assets_destination)
+        if os.path.exists(pod_assets):
+            cp_r(pod_assets, assets_destination)
+
+
 def _load_attribute_from_module(module_name: str, attribute_name: str) -> Any | None:
     """
     Attempts at getting an attribute from a given module.
@@ -101,6 +174,7 @@ class ReflectionStateLocator:
     provider: Any
 
     def __init__(self, provider: Optional[Any] = None, service: Optional[str] = None):
+        # todo: it should only take a provider
         self.provider = provider
         self.service = service or provider.service
 
@@ -153,3 +227,17 @@ class ReflectionStateLocator:
                 if attribute is not None:
                     LOG.debug("Visiting attribute %s in module %s", attribute_name, module_name)
                     visitor.visit(attribute)
+
+
+class AssetsVisitable:
+
+    provider: Any
+
+    def __init__(self, provider: Any):
+        self.provider = provider
+
+    def accept(self, visitor: StateVisitor):
+        # todo: should this take the string from _get_assets_location of the provider directly?
+        # it could also be visitor.get_assets_location()
+        assets_location = visitor.get_assets_location()
+        visitor.visit(self.provider)
