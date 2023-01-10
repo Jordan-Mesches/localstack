@@ -1,4 +1,7 @@
+import os
 import threading
+
+from localstack_ext.services.stepfunctions.persistence import restart_stepfunctions
 
 from localstack import config
 from localstack.aws.api import RequestContext, handler
@@ -18,6 +21,7 @@ from localstack.services.stepfunctions.stepfunctions_starter import (
     start_stepfunctions,
     wait_for_stepfunctions,
 )
+from localstack.utils.files import rm_rf
 
 # lock to avoid concurrency issues when creating state machines in parallel (required for StepFunctions-Local)
 CREATION_LOCK = threading.RLock()
@@ -26,6 +30,11 @@ CREATION_LOCK = threading.RLock()
 class StepFunctionsProvider(StepfunctionsApi, ServiceLifecycleHook):
     def __init__(self):
         self.forward_request = get_request_forwarder_http(self.get_forward_url)
+
+    def on_after_reset(self):
+        rm_rf(os.path.join(config.dirs.data, "stepfunctions"))
+        restart_stepfunctions()
+        wait_for_stepfunctions()
 
     def get_forward_url(self) -> str:
         """Return the URL of the backend StepFunctions server to forward requests to"""

@@ -1,15 +1,16 @@
 import importlib
 import logging
 import os
+from abc import ABC
 from functools import singledispatchmethod
 from typing import Any, Dict, List, Optional, Protocol, TypedDict, runtime_checkable
-from plugin import Plugin
-from localstack import config
 
 from moto.core import BackendDict
+from plugin import Plugin
 
+from localstack import config
 from localstack.services.stores import AccountRegionBundle
-from localstack.utils.files import load_file, rm_rf, cp_r
+from localstack.utils.files import cp_r, load_file, rm_rf
 
 LOG = logging.getLogger(__name__)
 
@@ -73,32 +74,31 @@ class ServiceBackendCollectorVisitor:
         return service_backend
 
 
-class ServiceAssetsLocator:
+class AssetsLocator(StateVisitor, ABC):
     """
     This class only implements the get_assets_location method that returns the path where a service stores its
     assets. It gets used by the visitors that retrieve and inject the assets to figure out such a location, and it's
     not designed to be used standalone. Ad-hoc service visitors can overwrite get_assets_location if needed.
     """
-    service: str
 
-    def get_assets_location(self) -> str:
+    def get_assets_location(self, service: str) -> str:
         base_path: str = config.dirs.data
-        return os.path.join(base_path, self.service)
+        return os.path.join(base_path, service)
 
 
-class RetrieveAssetsVisitor(Plugin, ServiceAssetsLocator):
+class RetrieveAssetsVisitor(Plugin, AssetsLocator):
 
     namespace = "localstack.assets.retrieve"
     assets: dict[str, bytes]
-    service: str
 
-    def __init__(self, service: str) -> None:
+    def __init__(self) -> None:
         self.assets = {}
-        self.service = service
 
     @singledispatchmethod
     def visit(self, state_container: Any):
-        raise NotImplementedError("%s can't visit a type %s", self.__class__.__name__, type(state_container))
+        raise NotImplementedError(
+            "%s can't visit a type %s", self.__class__.__name__, type(state_container)
+        )
 
     @visit.register(str)
     def _(self, state_container: str):
@@ -115,21 +115,20 @@ class RetrieveAssetsVisitor(Plugin, ServiceAssetsLocator):
                     asset_name: str = relative_path
                     asset_value: Optional[bytes] = load_file(absolute_path, mode="rb")
                     assets[asset_name] = asset_value
-        return assets
+        self.assets = assets
 
 
-class InjectAssetsVisitor(Plugin, ServiceAssetsLocator):
+class InjectAssetsVisitor(Plugin, AssetsLocator):
 
     namespace = "localstack.assets.inject"
     service: str
-
-    def __init__(self, pod_assets_directory: str, service: str) -> None:
-        self.pod_assets_directory = pod_assets_directory
-        self.service = service
+    pod_assets_directory: str
 
     @singledispatchmethod
     def visit(self, state_container: Any):
-        raise NotImplementedError("%s can't visit a type %s", self.__class__.__name__, type(state_container))
+        raise NotImplementedError(
+            "%s can't visit a type %s", self.__class__.__name__, type(state_container)
+        )
 
     @visit.register(str)
     def _(self, state_container: str):
@@ -138,6 +137,9 @@ class InjectAssetsVisitor(Plugin, ServiceAssetsLocator):
         rm_rf(assets_destination)
         if os.path.exists(pod_assets):
             cp_r(pod_assets, assets_destination)
+
+    def set_pods_assets_directory(self, tmp_pods_dir: str) -> None:
+        self.pod_assets_directory = tmp_pods_dir
 
 
 def _load_attribute_from_module(module_name: str, attribute_name: str) -> Any | None:
@@ -162,6 +164,11 @@ def _load_attributes(module_names: List[str], attribute_names: List[str]) -> Lis
         if attribute:
             attributes.append(attribute)
     return attributes
+
+
+#
+# StateVisitable
+#
 
 
 class ReflectionStateLocator:
@@ -230,14 +237,14 @@ class ReflectionStateLocator:
 
 
 class AssetsVisitable:
+    """Implementation of the StateVisitable protocol that collects and inject assets. The visitor needs to implement
+    the AssetsLocator abstract class that exposes the method to retrieve the asset location."""
 
     provider: Any
 
     def __init__(self, provider: Any):
         self.provider = provider
 
-    def accept(self, visitor: StateVisitor):
-        # todo: should this take the string from _get_assets_location of the provider directly?
-        # it could also be visitor.get_assets_location()
-        assets_location = visitor.get_assets_location()
-        visitor.visit(self.provider)
+    def accept(self, visitor: AssetsLocator):
+        assets_location: str = visitor.get_assets_location(self.provider)
+        visitor.visit(assets_location)
