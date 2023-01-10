@@ -121,7 +121,6 @@ class RetrieveAssetsVisitor(Plugin, AssetsLocator):
 class InjectAssetsVisitor(Plugin, AssetsLocator):
 
     namespace = "localstack.assets.inject"
-    service: str
     pod_assets_directory: str
 
     @singledispatchmethod
@@ -133,10 +132,9 @@ class InjectAssetsVisitor(Plugin, AssetsLocator):
     @visit.register(str)
     def _(self, state_container: str):
         assets_destination = state_container
-        pod_assets = os.path.join(self.pod_assets_directory, self.service)
         rm_rf(assets_destination)
-        if os.path.exists(pod_assets):
-            cp_r(pod_assets, assets_destination)
+        if os.path.exists(self.pod_assets_directory):
+            cp_r(self.pod_assets_directory, assets_destination)
 
     def set_pods_assets_directory(self, tmp_pods_dir: str) -> None:
         self.pod_assets_directory = tmp_pods_dir
