@@ -31,7 +31,7 @@ def parse_template(template: str) -> dict:
             return clone_safe(yaml.safe_load(template))
         except Exception:
             try:
-                return clone_safe(yaml.load(template, Loader=NoDatesSafeLoader))
+                return clone_safe(yaml.load(template, yaml.SafeLoader))
             except Exception as e:
                 LOG.debug("Unable to parse CloudFormation template (%s): %s", e, template)
                 raise
