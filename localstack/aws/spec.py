@@ -8,6 +8,7 @@ from typing import Dict, Generator, List, Optional, Tuple
 import jsonpatch
 from botocore.loaders import Loader, instance_cache
 from botocore.model import OperationModel, ServiceModel
+import fickling
 
 ServiceName = str
 
@@ -186,10 +187,9 @@ def load_service_index_cache(file: str) -> ServiceCatalogIndex:
     :param file: the file to load from
     :return: the loaded ServiceCatalogIndex
     """
-    import pickle
 
     with open(file, "rb") as fd:
-        return pickle.load(fd)
+        return fickling.load(fd)
 
 
 def save_service_index_cache(index: LazyServiceCatalogIndex, file_path: str) -> ServiceCatalogIndex:
