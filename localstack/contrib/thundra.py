@@ -26,6 +26,7 @@ from localstack.services.awslambda.lambda_utils import (
 )
 from localstack.utils import common
 from localstack.utils.http import download
+from security import safe_requests
 
 # logger
 LOG = logging.getLogger(__name__)
@@ -91,9 +92,7 @@ def _get_latest_java_agent_version(metadata_url):
     try:
         import xml.etree.ElementTree as et
 
-        import requests
-
-        response = requests.get(metadata_url)
+        response = safe_requests.get(metadata_url)
         xml = et.fromstring(response.content)
         latest_version = xml.find("./versioning/latest").text
 
