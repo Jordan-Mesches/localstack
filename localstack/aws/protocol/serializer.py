@@ -75,7 +75,6 @@ import base64
 import functools
 import json
 import logging
-import random
 import string
 from abc import ABC
 from binascii import crc32
@@ -109,6 +108,7 @@ from localstack.constants import (
 )
 from localstack.utils.common import to_bytes, to_str
 from localstack.utils.xml import strip_xmlns
+import secrets
 
 LOG = logging.getLogger(__name__)
 
@@ -1469,7 +1469,7 @@ class SqsResponseSerializer(QueryResponseSerializer):
 
 
 def gen_amzn_requestid_long():
-    return "".join([random.choice(REQUEST_ID_CHARACTERS) for _ in range(0, 52)])
+    return "".join([secrets.choice(REQUEST_ID_CHARACTERS) for _ in range(0, 52)])
 
 
 def create_serializer(service: ServiceModel) -> ResponseSerializer:

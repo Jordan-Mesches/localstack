@@ -1,6 +1,5 @@
 import logging
 import time
-from random import random
 
 import localstack.services.kinesis.kinesis_starter as starter
 from localstack import config
@@ -29,6 +28,7 @@ from localstack.services.kinesis.models import KinesisStore, kinesis_stores
 from localstack.services.plugins import ServiceLifecycleHook
 from localstack.utils.aws import arns, aws_stack
 from localstack.utils.time import now_utc
+import secrets
 
 LOG = logging.getLogger(__name__)
 MAX_SUBSCRIPTION_SECONDS = 300
@@ -122,7 +122,7 @@ class KinesisProvider(KinesisApi, ServiceLifecycleHook):
         explicit_hash_key: HashKey = None,
         sequence_number_for_ordering: SequenceNumber = None,
     ):
-        if random() < config.KINESIS_ERROR_PROBABILITY:
+        if secrets.SystemRandom().random() < config.KINESIS_ERROR_PROBABILITY:
             raise ProvisionedThroughputExceededException(
                 "Rate exceeded for shard X in stream Y under account Z."
             )
@@ -133,7 +133,7 @@ class KinesisProvider(KinesisApi, ServiceLifecycleHook):
     def put_records(
         self, context: RequestContext, records: PutRecordsRequestEntryList, stream_name: StreamName
     ) -> PutRecordsOutput:
-        if random() < config.KINESIS_ERROR_PROBABILITY:
+        if secrets.SystemRandom().random() < config.KINESIS_ERROR_PROBABILITY:
             records_count = len(records) if records is not None else 0
             records = [
                 PutRecordsResultEntry(

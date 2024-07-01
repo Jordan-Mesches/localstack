@@ -2,7 +2,6 @@ import logging
 import re
 import threading
 from datetime import datetime, timezone
-from random import randint
 from typing import Dict, Optional
 
 from localstack.aws.accounts import get_aws_account_id
@@ -91,6 +90,7 @@ from localstack.utils.aws.request_context import get_region_from_request_context
 from localstack.utils.collections import PaginatedList, remove_none_values_from_dict
 from localstack.utils.objects import singleton_factory
 from localstack.utils.serving import Server
+import secrets
 
 LOG = logging.getLogger(__name__)
 
@@ -234,7 +234,7 @@ def _status_to_config(status: DomainStatus) -> DomainConfig:
             Status=config_status,
         ),
         SnapshotOptions=SnapshotOptionsStatus(
-            Options=SnapshotOptions(AutomatedSnapshotStartHour=randint(0, 23)),
+            Options=SnapshotOptions(AutomatedSnapshotStartHour=secrets.SystemRandom().randint(0, 23)),
             Status=config_status,
         ),
         VPCOptions=VPCDerivedInfoStatus(
@@ -275,7 +275,7 @@ def get_domain_config_status() -> OptionStatus:
         PendingDeletion=False,
         State=OptionState.Active,
         UpdateDate=datetime.now(),
-        UpdateVersion=randint(1, 100),
+        UpdateVersion=secrets.SystemRandom().randint(1, 100),
     )
 
 

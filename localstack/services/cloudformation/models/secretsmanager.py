@@ -1,6 +1,5 @@
 import json
 import logging
-import random
 import string
 
 from localstack.services.cloudformation.deployment_utils import generate_default_name
@@ -11,6 +10,7 @@ from localstack.services.cloudformation.service_models import (
 )
 from localstack.utils.aws import arns, aws_stack
 from localstack.utils.common import select_attributes
+import secrets
 
 LOG = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class SecretsManagerSecret(GenericBaseModel):
         for char in excl_chars:
             alphabet = alphabet.replace(char, "")
 
-        result = [alphabet[random.randrange(len(alphabet))] for _ in range(length)]
+        result = [alphabet[secrets.SystemRandom().randrange(len(alphabet))] for _ in range(length)]
         result = "".join(result)
         return result
 
