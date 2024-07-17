@@ -93,7 +93,7 @@ def _get_latest_java_agent_version(metadata_url):
 
         import requests
 
-        response = requests.get(metadata_url)
+        response = requests.get(metadata_url, timeout=60)
         xml = et.fromstring(response.content)
         latest_version = xml.find("./versioning/latest").text
 
@@ -311,7 +311,7 @@ def _get_latest_python_agent_version():
 
         import requests
 
-        response = requests.get("https://pypi.org/pypi/thundra/json")
+        response = requests.get("https://pypi.org/pypi/thundra/json", timeout=60)
         data = json.loads(response.content.decode())
         versions = sorted(list(data["releases"].keys()), key=StrictVersion, reverse=True)
         return versions[0]

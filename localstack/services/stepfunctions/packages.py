@@ -94,14 +94,14 @@ class StepFunctionsLocalPackageInstaller(ExecutableInstaller):
                 auth_base = "https://auth.docker.io"
                 auth_service = "registry.docker.io"
                 token_request = requests.get(
-                    f"{auth_base}/token?service={auth_service}&scope=repository:{image}:pull"
-                )
+                    f"{auth_base}/token?service={auth_service}&scope=repository:{image}:pull", 
+                timeout=60)
                 token = json.loads(token_request.content.decode("utf-8"))["token"]
                 headers = {"Authorization": f"Bearer {token}"}
                 response = requests.get(
                     headers=headers,
                     url=f"{registry_base}/v2/{image}/blobs/{image_digest}",
-                )
+                timeout=60)
                 temp_path = new_tmp_file()
                 with open(temp_path, "wb") as f:
                     f.write(response.content)

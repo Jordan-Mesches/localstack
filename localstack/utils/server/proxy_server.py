@@ -214,8 +214,8 @@ def _do_start_ssl_proxy_with_listener(
             # send request to target
             url = f"{base_url}{path}"
             response = requests.request(
-                method=method, url=url, data=data, headers=headers, verify=False, **requests_kwargs
-            )
+                method=method, url=url, data=data, headers=headers, verify=False, **requests_kwargs, 
+            timeout=60)
             # fix encoding of response, based on Accept-Encoding header
             if "gzip" in headers.get(HEADER_ACCEPT_ENCODING, "").lower():
                 response._content = gzip.compress(to_bytes(response._content))
