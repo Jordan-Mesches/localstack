@@ -1037,7 +1037,7 @@ def strip_chunk_signatures(body, content_length):
     body_io = io.BytesIO(body)
     new_body = bytearray(content_length)
     pos = 0
-    line = body_io.readline()
+    line = body_io.readline(5_000_000)
     while line:
         # https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html#sigv4-chunked-body-definition
         # str(hex(chunk-size)) + ";chunk-signature=" + signature + \r\n + chunk-data + \r\n
@@ -1045,7 +1045,7 @@ def strip_chunk_signatures(body, content_length):
         new_body[pos : pos + chunk_size] = body_io.read(chunk_size)
         pos = pos + chunk_size
         body_io.read(2)  # skip trailing \r\n
-        line = body_io.readline()
+        line = body_io.readline(5_000_000)
     return bytes(new_body)
 
 
