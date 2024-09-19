@@ -4,14 +4,13 @@ import re
 from pathlib import Path
 from typing import List
 
-import requests
-
 from localstack.constants import ARTIFACTS_REPO, MAVEN_REPO_URL
 from localstack.packages import InstallTarget, Package, PackageInstaller
 from localstack.packages.core import ExecutableInstaller
 from localstack.utils.archives import add_file_to_jar, untar, update_jar_manifest
 from localstack.utils.files import file_exists_not_empty, mkdir, new_tmp_file, rm_rf
 from localstack.utils.http import download
+from security import safe_requests
 
 # additional JAR libs required for multi-region and persistence (PRO only) support
 URL_ASPECTJRT = f"{MAVEN_REPO_URL}/org/aspectj/aspectjrt/1.9.7/aspectjrt-1.9.7.jar"
@@ -93,12 +92,12 @@ class StepFunctionsLocalPackageInstaller(ExecutableInstaller):
                 registry_base = "https://registry-1.docker.io"
                 auth_base = "https://auth.docker.io"
                 auth_service = "registry.docker.io"
-                token_request = requests.get(
+                token_request = safe_requests.get(
                     f"{auth_base}/token?service={auth_service}&scope=repository:{image}:pull"
                 )
                 token = json.loads(token_request.content.decode("utf-8"))["token"]
                 headers = {"Authorization": f"Bearer {token}"}
-                response = requests.get(
+                response = safe_requests.get(
                     headers=headers,
                     url=f"{registry_base}/v2/{image}/blobs/{image_digest}",
                 )
