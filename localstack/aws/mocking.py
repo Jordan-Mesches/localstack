@@ -1,6 +1,5 @@
 import logging
 import math
-import random
 import re
 from datetime import date, datetime
 from functools import lru_cache, singledispatch
@@ -15,6 +14,7 @@ from localstack.aws.api import RequestContext, ServiceRequest, ServiceResponse
 from localstack.aws.skeleton import DispatchTable, ServiceRequestDispatcher, Skeleton
 from localstack.aws.spec import load_service
 from localstack.utils.sync import retry
+import secrets
 
 LOG = logging.getLogger(__name__)
 
@@ -229,7 +229,7 @@ def generate_instance(shape: Shape, graph: ShapeGraph) -> Optional[Instance]:
 @generate_instance.register
 def _(shape: StructureShape, graph: ShapeGraph) -> Dict[str, Instance]:
     if shape.is_tagged_union:
-        k, v = random.choice(list(shape.members.items()))
+        k, v = secrets.choice(list(shape.members.items()))
         members = {k: v}
     else:
         members = shape.members
@@ -286,7 +286,7 @@ def generate_arn(shape: StringShape):
             if region:
                 # TODO: check service in ARN and try to get the actual region for the service
                 regions = botocore.session.Session().get_available_regions("lambda")
-                picked_region = random.choice(regions)
+                picked_region = secrets.choice(regions)
                 arn_parts[3] = picked_region
                 arn = ":".join(arn_parts)
 
@@ -330,7 +330,7 @@ def _(shape: StringShape, graph: ShapeGraph) -> str:
     if not pattern or pattern in [".*", "^.*$", ".+"]:
         if min_len <= 6 and max_len >= 6:
             # pick a random six-letter word, to spice things up. this will be the case most of the time.
-            return random.choice(words)
+            return secrets.choice(words)
         else:
             return "a" * str_len
 

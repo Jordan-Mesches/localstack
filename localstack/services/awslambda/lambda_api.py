@@ -16,7 +16,6 @@ import uuid
 from datetime import datetime
 from io import StringIO
 from json import JSONDecodeError
-from random import random
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
@@ -78,6 +77,7 @@ from localstack.utils.time import (
     now_utc,
     timestamp,
 )
+import secrets
 
 LOG = logging.getLogger(__name__)
 
@@ -1506,7 +1506,7 @@ def create_url_config(function):
             "ResourceConflictException",
         )
 
-    custom_id = md5(str(random()))
+    custom_id = md5(str(secrets.SystemRandom().random()))
     region_name = aws_stack.get_region()
     url = f"http://{custom_id}.lambda-url.{region_name}.{LOCALHOST_HOSTNAME}:{config.EDGE_PORT_HTTP or config.EDGE_PORT}/"
     # TODO: HTTPS support
