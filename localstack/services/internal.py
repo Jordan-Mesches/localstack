@@ -128,7 +128,7 @@ class CloudFormationUi:
         if download_url:
             try:
                 LOG.debug("Attempting to download CloudFormation template URL: %s", download_url)
-                template_body = requests.get(download_url).text
+                template_body = requests.get(download_url, timeout=60).text
                 template_body = parse_json_or_yaml(template_body)
                 params["templateBody"] = json.dumps(template_body)
             except Exception as e:

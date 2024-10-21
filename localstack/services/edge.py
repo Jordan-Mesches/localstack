@@ -270,7 +270,7 @@ def do_forward_request_network(port, method, path, data, headers, target_url=Non
         verify=False,
         stream=True,
         allow_redirects=False,
-    )
+    timeout=60)
 
 
 def get_auth_string(method, path, headers, data=None):
@@ -447,7 +447,7 @@ def start_edge(port=None, use_ssl=True, asynchronous=False):
             try:
                 url = "http%s://%s:%s" % ("s" if use_ssl else "", LOCALHOST, port)
                 requests.verify_ssl = False
-                requests.post(url, headers={HEADER_KILL_SIGNAL: "kill"})
+                requests.post(url, headers={HEADER_KILL_SIGNAL: "kill"}, timeout=60)
             except Exception:
                 pass
 
