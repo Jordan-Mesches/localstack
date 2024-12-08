@@ -425,8 +425,7 @@ class HttpTopicPublisher(TopicPublisher):
                 subscriber["Endpoint"],
                 headers=message_headers,
                 data=message_body,
-                verify=False,
-            )
+                verify=True)
 
             delivery = {
                 "statusCode": response.status_code,

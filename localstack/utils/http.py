@@ -105,8 +105,7 @@ def make_http_request(
     url: str, data: Union[bytes, str] = None, headers: Dict[str, str] = None, method: str = "GET"
 ) -> Response:
     return requests.request(
-        url=url, method=method, headers=headers, data=data, auth=NetrcBypassAuth(), verify=False
-    )
+        url=url, method=method, headers=headers, data=data, auth=NetrcBypassAuth(), verify=True)
 
 
 class NetrcBypassAuth(requests.auth.AuthBase):
