@@ -11,6 +11,7 @@ import semver
 
 from localstack.aws.api.opensearch import CompatibleVersionsMap, EngineType
 from localstack.utils.common import get_arch
+from security import safe_requests
 
 # Internal representation of the OpenSearch versions (without the "OpenSearch_" prefix)
 _opensearch_install_versions = {"1.0": "1.0.0", "1.1": "1.1.0", "1.2": "1.2.4", "1.3": "1.3.6"}
@@ -272,13 +273,11 @@ def fetch_latest_versions() -> Dict[str, str]:  # pragma: no cover
     """
     from collections import defaultdict
 
-    import requests
-
     versions = []
 
     i = 0
     while True:
-        tags_raw = requests.get(
+        tags_raw = safe_requests.get(
             f"https://api.github.com/repos/opensearch-project/OpenSearch/tags?per_page=100&page={i}"
         )
         tags = tags_raw.json()
