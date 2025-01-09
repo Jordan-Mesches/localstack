@@ -1,7 +1,6 @@
 import copy
 import json
 import logging
-import random
 import re
 import time
 import traceback
@@ -114,6 +113,7 @@ from localstack.utils.common import short_uid, to_bytes
 from localstack.utils.json import BytesEncoder, canonical_json
 from localstack.utils.strings import long_uid, to_str
 from localstack.utils.threads import start_worker_thread
+import secrets
 
 # set up logger
 LOG = logging.getLogger(__name__)
@@ -1489,7 +1489,7 @@ class DynamoDBProvider(DynamodbApi, ServiceLifecycleHook):
         return (action in throttled) or (action in actions)
 
     def should_throttle(self, action):
-        rand = random.random()
+        rand = secrets.SystemRandom().random()
         if rand < config.DYNAMODB_READ_ERROR_PROBABILITY and self.action_should_throttle(
             action, READ_THROTTLED_ACTIONS
         ):
