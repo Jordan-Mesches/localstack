@@ -114,7 +114,7 @@ def send_data_to_tinybird(data: list[str], data_name: str):
             "token": token,
         },
         data=data_to_send,
-    )
+    timeout=60)
     print(f"sent data to tinybird, status code: {r.status_code}: {r.text}")
 
 

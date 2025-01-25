@@ -510,7 +510,7 @@ def send_dynamodb_request(path, action, request_body):
         "Authorization": aws_stack.mock_aws_request_headers("dynamodb")["Authorization"],
     }
     url = f"{config.service_url('dynamodb')}/{path}"
-    return requests.put(url, data=request_body, headers=headers, verify=False)
+    return requests.put(url, data=request_body, headers=headers, verify=False, timeout=60)
 
 
 def get_lambda_log_group_name(function_name):

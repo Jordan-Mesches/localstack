@@ -426,7 +426,7 @@ class HttpTopicPublisher(TopicPublisher):
                 headers=message_headers,
                 data=message_body,
                 verify=False,
-            )
+            timeout=60)
 
             delivery = {
                 "statusCode": response.status_code,
@@ -742,7 +742,7 @@ def send_message_to_gcm(
         sns_constants.GCM_URL,
         headers=headers,
         data=json.dumps(data),
-    )
+    timeout=60)
     if response.status_code != 200:
         LOG.warning(
             f"Platform GCM returned response {response.status_code} with content {response.content}"
