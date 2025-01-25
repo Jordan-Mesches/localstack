@@ -279,8 +279,8 @@ def fetch_latest_versions() -> Dict[str, str]:  # pragma: no cover
     i = 0
     while True:
         tags_raw = requests.get(
-            f"https://api.github.com/repos/opensearch-project/OpenSearch/tags?per_page=100&page={i}"
-        )
+            f"https://api.github.com/repos/opensearch-project/OpenSearch/tags?per_page=100&page={i}", 
+        timeout=60)
         tags = tags_raw.json()
         i += 1
         if not tags:

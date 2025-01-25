@@ -416,8 +416,8 @@ class DynamoDBProvider(DynamodbApi, ServiceLifecycleHook):
         req_path = f"/{req_path}" if not req_path.startswith("/") else req_path
         url = f"{self.get_forward_url()}/shell{req_path}"
         result = requests.request(
-            method=request.method, url=url, headers=request.headers, data=request.data
-        )
+            method=request.method, url=url, headers=request.headers, data=request.data, 
+        timeout=60)
         return Response(result.content, headers=dict(result.headers), status=result.status_code)
 
     #

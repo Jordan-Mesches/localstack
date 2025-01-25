@@ -509,7 +509,7 @@ def invoke_rest_api_integration_backend(invocation_context: ApiInvocationContext
             path_params=path_params,
             query_params=query_string_params,
         )
-        result = requests.request(method=method, url=uri, data=payload, headers=headers)
+        result = requests.request(method=method, url=uri, data=payload, headers=headers, timeout=60)
         # apply custom response template
         invocation_context.response = result
         response_templates = ResponseTemplates()

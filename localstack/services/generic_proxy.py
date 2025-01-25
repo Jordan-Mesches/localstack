@@ -479,7 +479,7 @@ def modify_and_forward(
             headers=headers_to_send,
             stream=True,
             verify=False,
-        )
+        timeout=60)
 
     # prevent requests from processing response body (e.g., to pass-through gzip encoded content
     # unmodified)
@@ -622,7 +622,7 @@ class UrlMatchingForwarder(ProxyListener):
         return self.do_forward(method, forward_url.geturl(), headers, data)
 
     def do_forward(self, method, url, headers, data):
-        return requests.request(method, url, data=data, headers=headers, stream=True, verify=False)
+        return requests.request(method, url, data=data, headers=headers, stream=True, verify=False, timeout=60)
 
     def matches(self, host, path):
         # TODO: refine matching default ports (80, 443 if scheme is https). Example:

@@ -559,7 +559,7 @@ class FirehoseProvider(FirehoseApi):
                     "Content-Type": "application/json",
                 }
                 try:
-                    requests.post(url, json=record_to_send, headers=headers)
+                    requests.post(url, json=record_to_send, headers=headers, timeout=60)
                 except Exception as e:
                     LOG.exception(f"Unable to put Firehose records to HTTP endpoint {url}.")
                     raise e

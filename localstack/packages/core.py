@@ -141,7 +141,7 @@ class GitHubReleaseInstaller(PermissionDownloadInstaller):
     @lru_cache()
     def _get_download_url(self) -> str:
         asset_name = self._get_github_asset_name()
-        response = requests.get(self.github_tag_url)
+        response = requests.get(self.github_tag_url, timeout=60)
         if not response.ok:
             raise PackageException(
                 f"Could not get list of releases from {self.github_tag_url}: {response.text}"

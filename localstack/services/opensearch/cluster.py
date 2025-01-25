@@ -40,7 +40,7 @@ def get_cluster_health_status(url: str) -> Optional[str]:
     Queries the health endpoint of OpenSearch/Elasticsearch and returns either the status ('green', 'yellow',
     ...) or None if the response returned a non-200 response.
     """
-    resp = requests.get(url + "/_cluster/health")
+    resp = requests.get(url + "/_cluster/health", timeout=60)
 
     if resp and resp.ok:
         opensearch_status = resp.json()
