@@ -231,7 +231,7 @@ class OutputReaderThread(FuncThread):
         # deprecated
         with open(file) as f:
             while self.running:
-                line = f.readline()
+                line = f.readline(5_000_000)
                 if not line:
                     # empty if at EOF (non-empty, including newline, if not at EOF)
                     return
