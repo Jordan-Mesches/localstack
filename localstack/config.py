@@ -27,6 +27,7 @@ from localstack.constants import (
     TRACE_LOG_LEVELS,
     TRUE_STRINGS,
 )
+from security import safe_command
 
 # keep track of start time, for performance debugging
 load_start_time = time.time()
@@ -271,7 +272,7 @@ def ping(host):
     ping_opts = "-n 1" if is_windows else "-c 1"
     args = "ping %s %s" % (ping_opts, host)
     return (
-        subprocess.call(args, shell=not is_windows, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        safe_command.run(subprocess.call, args, shell=not is_windows, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         == 0
     )
 

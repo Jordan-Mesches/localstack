@@ -18,6 +18,7 @@ from localstack.utils.platform import is_linux, is_mac_os, is_windows  # noqa
 
 from .sync import retry
 from .threads import FuncThread, start_worker_thread
+from security import safe_command
 
 LOG = logging.getLogger(__name__)
 
@@ -84,8 +85,7 @@ def run(
         kwargs = {}
         if is_linux() or is_mac_os():
             kwargs["start_new_session"] = True
-        process = subprocess.Popen(
-            cmd,
+        process = safe_command.run(subprocess.Popen, cmd,
             shell=shell,
             stdin=stdin_arg,
             bufsize=-1,

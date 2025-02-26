@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 
 from localstack.runtime import hooks
 from localstack.utils.objects import singleton_factory
+from security import safe_command
 
 LOG = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class ShellScriptRunner(ScriptRunner):
     """
 
     def run(self, path: str) -> None:
-        exit_code = subprocess.call(args=[], executable=path)
+        exit_code = safe_command.run(subprocess.call, args=[], executable=path)
         if exit_code != 0:
             raise OSError("Script %s returned a non-zero exit code %s" % (path, exit_code))
 
