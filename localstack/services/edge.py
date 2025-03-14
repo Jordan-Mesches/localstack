@@ -267,8 +267,7 @@ def do_forward_request_network(port, method, path, data, headers, target_url=Non
         url,
         data=data,
         headers=headers,
-        verify=False,
-        stream=True,
+        verify=True, stream=True,
         allow_redirects=False,
     )
 
