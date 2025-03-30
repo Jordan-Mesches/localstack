@@ -3,14 +3,13 @@ import os
 from abc import ABC
 from functools import lru_cache
 
-import requests
-
 from localstack import config
 
 from ..utils.archives import download_and_extract
 from ..utils.files import chmod_r, mkdir, rm_rf
 from ..utils.http import download
 from .api import InstallTarget, PackageException, PackageInstaller
+from security import safe_requests
 
 LOG = logging.getLogger(__name__)
 
@@ -141,7 +140,7 @@ class GitHubReleaseInstaller(PermissionDownloadInstaller):
     @lru_cache()
     def _get_download_url(self) -> str:
         asset_name = self._get_github_asset_name()
-        response = requests.get(self.github_tag_url)
+        response = safe_requests.get(self.github_tag_url)
         if not response.ok:
             raise PackageException(
                 f"Could not get list of releases from {self.github_tag_url}: {response.text}"

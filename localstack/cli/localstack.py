@@ -6,6 +6,7 @@ from typing import Dict, List, Optional
 
 from localstack import config
 from localstack.utils.analytics.cli import publish_invocation
+from security import safe_requests
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
@@ -90,7 +91,7 @@ def cmd_status_services(format):
     url = config.get_edge_url()
 
     try:
-        health = requests.get(f"{url}/_localstack/health", timeout=2)
+        health = safe_requests.get(f"{url}/_localstack/health", timeout=2)
         doc = health.json()
         services = doc.get("services", [])
         if format == "table":

@@ -3,8 +3,6 @@ import os
 from typing import Dict, List, NamedTuple, Optional
 from urllib.parse import urlparse
 
-import requests
-
 from localstack import config, constants
 from localstack.aws.api.opensearch import EngineType
 from localstack.services.generic_proxy import EndpointProxy
@@ -21,6 +19,7 @@ from localstack.utils.common import (
 )
 from localstack.utils.run import FuncThread
 from localstack.utils.serving import Server
+from security import safe_requests
 
 LOG = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ def get_cluster_health_status(url: str) -> Optional[str]:
     Queries the health endpoint of OpenSearch/Elasticsearch and returns either the status ('green', 'yellow',
     ...) or None if the response returned a non-200 response.
     """
-    resp = requests.get(url + "/_cluster/health")
+    resp = safe_requests.get(url + "/_cluster/health")
 
     if resp and resp.ok:
         opensearch_status = resp.json()

@@ -4,8 +4,6 @@ import logging
 import os
 from collections import defaultdict
 from typing import List, Optional
-
-import requests
 from werkzeug.exceptions import NotFound
 
 from localstack import config, constants
@@ -19,6 +17,7 @@ from localstack.utils.files import load_file
 from localstack.utils.functions import call_safe
 from localstack.utils.json import parse_json_or_yaml
 from localstack.utils.server.http2_server import HTTP_METHODS
+from security import safe_requests
 
 LOG = logging.getLogger(__name__)
 
@@ -128,7 +127,7 @@ class CloudFormationUi:
         if download_url:
             try:
                 LOG.debug("Attempting to download CloudFormation template URL: %s", download_url)
-                template_body = requests.get(download_url).text
+                template_body = safe_requests.get(download_url).text
                 template_body = parse_json_or_yaml(template_body)
                 params["templateBody"] = json.dumps(template_body)
             except Exception as e:
