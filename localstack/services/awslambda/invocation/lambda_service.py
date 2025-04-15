@@ -3,7 +3,6 @@ import concurrent.futures
 import dataclasses
 import io
 import logging
-import random
 import uuid
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from datetime import datetime
@@ -46,6 +45,7 @@ from localstack.utils.aws import aws_stack
 from localstack.utils.container_utils.container_client import ContainerException
 from localstack.utils.docker_utils import DOCKER_CLIENT as CONTAINER_CLIENT
 from localstack.utils.strings import to_str
+import secrets
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -205,7 +205,7 @@ class LambdaService:
                 version, probability = next(
                     iter(alias.routing_configuration.version_weights.items())
                 )
-                if random.random() < probability:
+                if secrets.SystemRandom().random() < probability:
                     version_qualifier = version
         else:
             version_qualifier = qualifier

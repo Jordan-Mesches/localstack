@@ -1,6 +1,5 @@
 """ Utilities for the new Lambda ASF provider. Do not use in the current provider, as ASF specific exceptions might be thrown """
 import datetime
-import random
 import re
 import string
 from typing import TYPE_CHECKING, Any, Optional
@@ -24,6 +23,7 @@ from localstack.aws.api.lambda_ import (
     TracingConfig,
 )
 from localstack.utils.collections import merge_recursive
+import secrets
 
 if TYPE_CHECKING:
     from localstack.services.awslambda.invocation.lambda_models import (
@@ -297,7 +297,7 @@ def generate_random_url_id() -> str:
     32 characters [0-9a-z] url ID
     """
 
-    return "".join(random.choices(URL_CHAR_SET, k=32))
+    return "".join(secrets.SystemRandom().choices(URL_CHAR_SET, k=32))
 
 
 def unqualified_lambda_arn(function_name: str, account: str, region: str):

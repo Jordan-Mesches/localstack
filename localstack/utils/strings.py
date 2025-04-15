@@ -2,7 +2,6 @@ import base64
 import binascii
 import hashlib
 import itertools
-import random
 import re
 import string
 import uuid
@@ -12,6 +11,7 @@ from typing import Dict, List, Union
 from botocore.httpchecksum import CrtCrc32cChecksum
 
 from localstack.config import DEFAULT_ENCODING
+import secrets
 
 _unprintables = (
     range(0x00, 0x09),
@@ -184,4 +184,4 @@ def base64_decode(data: Union[str, bytes]) -> bytes:
 
 
 def get_random_hex(length: int) -> str:
-    return "".join(random.choices(string.hexdigits[:16], k=length)).lower()
+    return "".join(secrets.SystemRandom().choices(string.hexdigits[:16], k=length)).lower()

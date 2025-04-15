@@ -1,6 +1,5 @@
 import json
 import logging
-import random
 import string
 
 from botocore.exceptions import ClientError
@@ -19,6 +18,7 @@ from localstack.services.iam.provider import SERVICE_LINKED_ROLE_PATH_PREFIX
 from localstack.utils.aws import arns, aws_stack
 from localstack.utils.common import ensure_list
 from localstack.utils.functions import call_safe
+import secrets
 
 LOG = logging.getLogger(__name__)
 
@@ -454,7 +454,7 @@ class IAMPolicy(GenericBaseModel):
             resource = resources[resource_id]
             # the physical resource ID here has a bit of a weird format
             # e.g. 'stack-fnSe-1OKWZIBB89193' where fnSe are the first 4 characters of the LogicalResourceId (or name?)
-            suffix = "".join(random.choices(string.ascii_uppercase + string.digits, k=13))
+            suffix = "".join(secrets.SystemRandom().choices(string.ascii_uppercase + string.digits, k=13))
             resource["PhysicalResourceId"] = f"stack-{resource.get('PolicyName', '')[:4]}-{suffix}"
 
         def _create(resource_id, resources, resource_type, func, stack_name, *args, **kwargs):
