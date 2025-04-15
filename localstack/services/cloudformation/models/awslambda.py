@@ -1,6 +1,5 @@
 import json
 import os
-import random
 import string
 
 from localstack.services.awslambda.lambda_utils import get_handler_file_from_name
@@ -24,6 +23,7 @@ from localstack.utils.common import (
 )
 from localstack.utils.strings import short_uid
 from localstack.utils.testutil import create_zip_file
+import secrets
 
 
 class LambdaFunction(GenericBaseModel):
@@ -284,7 +284,7 @@ class LambdaPermission(GenericBaseModel):
             # generate SID
             # e.g. stack-78d0ac66-fnAllowInvokeLambdaPermissionsStacktopicF723B1A748672DB5-1D7VMEAZ2UQIN
             # e.g. stack-6283277e-fnAllowInvokeLambdaPermissionsStacktopicF48672DB5-19EAQW5GIWOS5 when the functional ID is shorter
-            suffix = "".join(random.choices(string.digits + string.ascii_uppercase, k=13))
+            suffix = "".join(secrets.SystemRandom().choices(string.digits + string.ascii_uppercase, k=13))
             prefix = kwargs.get("stack_name")
             if prefix:
                 result["StatementId"] = f"{prefix}-{resource_id}-{suffix}"

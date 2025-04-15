@@ -1,7 +1,6 @@
 import functools
 import logging
 import platform
-import random
 import re
 from typing import List, Optional
 
@@ -14,6 +13,7 @@ from localstack.utils.container_utils.container_client import (
 )
 from localstack.utils.net import PortNotAvailableException, PortRange
 from localstack.utils.strings import to_str
+import secrets
 
 LOG = logging.getLogger(__name__)
 
@@ -181,7 +181,7 @@ def reserve_available_container_port(duration: int = None) -> int:
     def _random_port():
         port = None
         while not port or reserved_docker_ports.is_port_reserved(port):
-            port = random.randint(PORT_START, PORT_END)
+            port = secrets.SystemRandom().randint(PORT_START, PORT_END)
         return port
 
     retries = 10

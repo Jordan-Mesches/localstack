@@ -1,5 +1,4 @@
 import logging
-import random
 import string
 from datetime import date, datetime
 from enum import Enum, auto
@@ -15,6 +14,7 @@ from localstack.services.awslambda.invocation.runtime_executor import (
 )
 from localstack.utils.aws import aws_stack
 from localstack.utils.strings import to_str
+import secrets
 
 if TYPE_CHECKING:
     from localstack.services.awslambda.invocation.version_manager import QueuedInvocation
@@ -43,7 +43,7 @@ class InvalidStatusException(Exception):
 
 
 def generate_runtime_id() -> str:
-    return "".join(random.choices(string.hexdigits[:16], k=32)).lower()
+    return "".join(secrets.SystemRandom().choices(string.hexdigits[:16], k=32)).lower()
 
 
 class RuntimeEnvironment:

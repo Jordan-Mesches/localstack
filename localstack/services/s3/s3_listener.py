@@ -5,7 +5,6 @@ import datetime
 import io
 import json
 import logging
-import random
 import re
 import uuid
 from typing import Any, Dict, List
@@ -64,6 +63,7 @@ from localstack.utils.strings import (
 )
 from localstack.utils.time import timestamp_millis
 from localstack.utils.xml import strip_xmlns
+import secrets
 
 # backend port (configured in s3_starter.py on startup)
 PORT_S3_BACKEND = None
@@ -671,7 +671,7 @@ def append_cors_headers(
 
 
 def append_aws_request_troubleshooting_headers(response):
-    gen_amz_request_id = "".join(random.choice("0123456789ABCDEF") for i in range(16))
+    gen_amz_request_id = "".join(secrets.choice("0123456789ABCDEF") for i in range(16))
     if response.headers.get("x-amz-request-id") is None:
         response.headers["x-amz-request-id"] = gen_amz_request_id
     if response.headers.get("x-amz-id-2") is None:
